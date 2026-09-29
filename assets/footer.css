@@ -335,7 +335,6 @@
 .footer__subfooter .custom-select__btn,
 .footer__subfooter .custom-select__listbox {
   border-color: rgba(var(--text-color)/0.2);
-  border-color: rgba(var(--text-color)/0.2);
 }
 
 @media (min-width: 769px) {
@@ -1073,8 +1072,6 @@
   }
 
   .footer__newsletter-strip.is-open .footer__newsletter-header::after {
-    content: "-";
-    content: "−";
     content: "-";
   }
 
