@@ -53,29 +53,8 @@ if (!customElements.get('price-range')) {
       const minValue = Number.parseInt(this.minNumberInput.value, 10);
       const maxValue = Number.parseInt(this.maxNumberInput.value, 10);
 
-      if (minValue > maxValue - 10) {
-        if (evt.target === this.minNumberInput) {
-          this.maxSliderInput.value = minValue + 10;
-
-          if (maxValue === this.maxValue) {
-            this.minSliderInput.value = this.maxValue - 10;
-          }
-        } else {
-          this.minSliderInput.value = maxValue - 10;
-        }
-      }
-
-      if (maxValue < minValue + 10) {
-        if (evt.target === this.maxNumberInput) {
-          this.minSliderInput.value = maxValue - 10;
-
-          if (minValue === this.minValue) {
-            this.maxSliderInput.value = 10;
-          }
-        } else {
-          this.maxSliderInput.value = minValue + 10;
-        }
-      }
+      this.enforceMinGap(evt, minValue, maxValue);
+      this.enforceMaxGap(evt, minValue, maxValue);
 
       if (evt.target === this.minNumberInput) {
         this.minSliderInput.value = minValue || Number(this.minNumberInput.min);
@@ -83,6 +62,46 @@ if (!customElements.get('price-range')) {
 
       if (evt.target === this.maxNumberInput) {
         this.maxSliderInput.value = maxValue || Number(this.maxNumberInput.max);
+      }
+    }
+
+    /**
+     * Keeps a minimum 10-unit gap when the lower bound gets too close.
+     * @param {object} evt - Event object.
+     * @param {number} minValue - Current min input value.
+     * @param {number} maxValue - Current max input value.
+     */
+    enforceMinGap(evt, minValue, maxValue) {
+      if (minValue <= maxValue - 10) return;
+
+      if (evt.target === this.minNumberInput) {
+        this.maxSliderInput.value = minValue + 10;
+
+        if (maxValue === this.maxValue) {
+          this.minSliderInput.value = this.maxValue - 10;
+        }
+      } else {
+        this.minSliderInput.value = maxValue - 10;
+      }
+    }
+
+    /**
+     * Keeps a minimum 10-unit gap when the upper bound gets too close.
+     * @param {object} evt - Event object.
+     * @param {number} minValue - Current min input value.
+     * @param {number} maxValue - Current max input value.
+     */
+    enforceMaxGap(evt, minValue, maxValue) {
+      if (maxValue >= minValue + 10) return;
+
+      if (evt.target === this.maxNumberInput) {
+        this.minSliderInput.value = maxValue - 10;
+
+        if (minValue === this.minValue) {
+          this.maxSliderInput.value = 10;
+        }
+      } else {
+        this.maxSliderInput.value = minValue + 10;
       }
     }
   }

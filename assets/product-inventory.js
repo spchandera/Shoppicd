@@ -56,63 +56,82 @@ if (!customElements.get('product-inventory')) {
      * @param {string} inventoryPolicy - whether product continues selling when out of stock
      */
     updateInventory(count, available, inventoryPolicy) {
-      let inventoryLevel;
+      const inventoryLevel = this.determineInventoryLevel(count, available, inventoryPolicy);
 
-      if (count <= 0) {
-        if (inventoryPolicy === 'continue') {
-          inventoryLevel = 'backordered';
-        } else if (available) {
-          inventoryLevel = 'in_stock';
-        } else {
-          inventoryLevel = 'none';
-        }
-      } else if (count <= Number.parseInt(this.dataset.thresholdVeryLow, 10)) {
-        inventoryLevel = 'very_low';
-      } else if (count <= Number.parseInt(this.dataset.thresholdLow, 10)) {
-        inventoryLevel = 'low';
-      } else {
-        inventoryLevel = 'normal';
+      const showNotice = (this.dataset.showNotice === 'always'
+        || (this.dataset.showNotice === 'low' && inventoryLevel.includes('low')))
+        && !(inventoryLevel === 'backordered' && this.dataset.showNoStockBackordered === 'false');
+
+      if (!showNotice) {
+        this.hidden = true;
+        return;
       }
 
-      if (((this.dataset.showNotice === 'always'
-        || (this.dataset.showNotice === 'low' && inventoryLevel.includes('low')))
-        && !(inventoryLevel === 'backordered' && this.dataset.showNoStockBackordered === 'false'))) {
-        this.hidden = false;
+      this.hidden = false;
+      this.dataset.inventoryLevel = inventoryLevel;
+      this.setInventoryNotice(inventoryLevel, count);
+      this.setUrgencyMessage(inventoryLevel);
+    }
 
-        // Set the inventory level data attribute
-        this.dataset.inventoryLevel = inventoryLevel;
+    /**
+     * Maps a stock count to an inventory level keyword.
+     * @param {number} count - Inventory count.
+     * @param {boolean} available - Whether the variant is available.
+     * @param {string} inventoryPolicy - Shopify inventory policy.
+     * @returns {string} The inventory level keyword.
+     */
+    determineInventoryLevel(count, available, inventoryPolicy) {
+      if (count <= 0) {
+        if (inventoryPolicy === 'continue') return 'backordered';
+        return available ? 'in_stock' : 'none';
+      }
+      if (count <= Number.parseInt(this.dataset.thresholdVeryLow, 10)) return 'very_low';
+      if (count <= Number.parseInt(this.dataset.thresholdLow, 10)) return 'low';
+      return 'normal';
+    }
 
-        // Determine whether to show the count or not
-        if (inventoryLevel === 'backordered') {
-          this.inventoryNotice.innerText = theme.strings.backordered;
-        } else if (inventoryLevel !== 'in_stock' && (this.dataset.showCount === 'always' || (this.dataset.showCount === 'low' && inventoryLevel.includes('low')))) {
-          this.inventoryNotice.innerText = theme.strings.onlyXLeft.replace('[quantity]', count);
-        } else if (inventoryLevel === 'very_low') {
-          this.inventoryNotice.innerText = theme.strings.veryLowStock;
-        } else if (inventoryLevel === 'low') {
-          this.inventoryNotice.innerText = theme.strings.lowStock;
-        } else if (inventoryLevel === 'normal' || inventoryLevel === 'in_stock') {
-          this.inventoryNotice.innerText = theme.strings.inStock;
-        } else if (inventoryLevel === 'none') {
-          this.inventoryNotice.innerText = theme.strings.noStock;
-        }
+    /**
+     * Sets the inventory notice text for the given level.
+     * @param {string} inventoryLevel - Inventory level keyword.
+     * @param {number} count - Inventory count.
+     */
+    setInventoryNotice(inventoryLevel, count) {
+      const showCount = this.dataset.showCount === 'always'
+        || (this.dataset.showCount === 'low' && inventoryLevel.includes('low'));
 
-        // Update urgency message if needed
-        if (this.urgencyMessage) {
-          if (inventoryLevel === 'very_low') {
-            this.urgencyMessage.innerHTML = this.dataset.textVeryLow;
-          } else if (inventoryLevel === 'low') {
-            this.urgencyMessage.innerHTML = this.dataset.textLow;
-          } else if (inventoryLevel === 'backordered') {
-            this.urgencyMessage.innerHTML = this.dataset.textNoStockBackordered;
-          } else if (inventoryLevel === 'normal' || inventoryLevel === 'in_stock') {
-            this.urgencyMessage.innerHTML = this.dataset.textNormal;
-          } else if (inventoryLevel === 'none') {
-            this.urgencyMessage.innerHTML = this.dataset.textNoStock;
-          }
-        }
-      } else {
-        this.hidden = true;
+      if (inventoryLevel === 'backordered') {
+        this.inventoryNotice.innerText = theme.strings.backordered;
+      } else if (inventoryLevel !== 'in_stock' && showCount) {
+        this.inventoryNotice.innerText = theme.strings.onlyXLeft.replace('[quantity]', count);
+      } else if (inventoryLevel === 'very_low') {
+        this.inventoryNotice.innerText = theme.strings.veryLowStock;
+      } else if (inventoryLevel === 'low') {
+        this.inventoryNotice.innerText = theme.strings.lowStock;
+      } else if (inventoryLevel === 'normal' || inventoryLevel === 'in_stock') {
+        this.inventoryNotice.innerText = theme.strings.inStock;
+      } else if (inventoryLevel === 'none') {
+        this.inventoryNotice.innerText = theme.strings.noStock;
+      }
+    }
+
+    /**
+     * Sets the urgency message HTML for the given level, if present.
+     * @param {string} inventoryLevel - Inventory level keyword.
+     */
+    setUrgencyMessage(inventoryLevel) {
+      if (!this.urgencyMessage) return;
+
+      const messages = {
+        very_low: this.dataset.textVeryLow,
+        low: this.dataset.textLow,
+        backordered: this.dataset.textNoStockBackordered,
+        normal: this.dataset.textNormal,
+        in_stock: this.dataset.textNormal,
+        none: this.dataset.textNoStock
+      };
+
+      if (inventoryLevel in messages) {
+        this.urgencyMessage.innerHTML = messages[inventoryLevel];
       }
     }
   }

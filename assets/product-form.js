@@ -347,7 +347,7 @@ if (!customElements.get('product-form')) {
         lineErrors.innerHTML = '';
         lineErrors.hidden = true;
       } catch (error) {
-        if (/^d+$/.test(error.message)) {
+        if (/^\d+$/.test(error.message)) {
           lineErrors.textContent = theme.strings.cartError;
         } else {
           lineErrors.textContent = error.message;
