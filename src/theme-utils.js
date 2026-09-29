@@ -27,13 +27,32 @@ export function clamp(value, min, max) {
  * @param {number} [options.precision=2] - Number of decimal places.
  * @returns {string} The formatted money string.
  */
+/**
+ * Insert comma thousands separators into a string of digits (with optional
+ * leading minus sign). Uses a linear scan rather than a regular expression.
+ * @param {string} whole - The integer part as a string.
+ * @returns {string} The value with thousands separators.
+ */
+function addThousandsSeparators(whole) {
+  const negative = whole.startsWith('-');
+  const digits = negative ? whole.slice(1) : whole;
+  let result = '';
+
+  for (let i = 0; i < digits.length; i += 1) {
+    if (i > 0 && (digits.length - i) % 3 === 0) result += ',';
+    result += digits[i];
+  }
+
+  return negative ? `-${result}` : result;
+}
+
 export function formatMoney(cents, { currencySymbol = '$', precision = 2 } = {}) {
   const amount = Number(cents);
   if (Number.isNaN(amount)) return `${currencySymbol}0.00`;
 
   const value = (amount / 100).toFixed(precision);
   const [whole, fraction] = value.split('.');
-  const withThousands = whole.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  const withThousands = addThousandsSeparators(whole);
 
   return fraction ? `${currencySymbol}${withThousands}.${fraction}` : `${currencySymbol}${withThousands}`;
 }

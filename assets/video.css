@@ -19,6 +19,7 @@
 
 .video-section__media {
   padding-top: 56.3%;
+  overflow: hidden;
 }
 .video-section__media iframe,
 .video-section__media video {
@@ -60,10 +61,6 @@
 
 .video-section__media .height-clip {
   height: calc(100% - 2px);
-}
-
-.video-section__media {
-  overflow: hidden;
 }
 .video-section__media video,
 .video-section__media iframe {

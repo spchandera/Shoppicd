@@ -312,7 +312,7 @@ if (!customElements.get('gallery-zoom')) {
       if (this.thumbContainer.childElementCount < 2) return;
 
       let previous = this.thumbContainer.querySelector('.gallery-zoom__thumb--active')?.previousElementSibling;
-      while (!previous || !previous.offsetParent) {
+      while (!previous?.offsetParent) {
         if (!previous) {
           previous = this.thumbContainer.lastElementChild;
         } else {
@@ -331,7 +331,7 @@ if (!customElements.get('gallery-zoom')) {
       if (this.thumbContainer.childElementCount < 2) return;
 
       let next = this.thumbContainer.querySelector('.gallery-zoom__thumb--active')?.nextElementSibling;
-      while (!next || !next.offsetParent) {
+      while (!next?.offsetParent) {
         if (!next) {
           next = this.thumbContainer.firstElementChild;
         } else {

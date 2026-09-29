@@ -37,6 +37,14 @@ describe('formatMoney', () => {
   it('falls back to zero for non-numeric input', () => {
     expect(formatMoney('not-a-number')).toBe('$0.00');
   });
+
+  it('handles negative amounts', () => {
+    expect(formatMoney(-123456)).toBe('$-1,234.56');
+  });
+
+  it('does not add a separator below one thousand', () => {
+    expect(formatMoney(12345)).toBe('$123.45');
+  });
 });
 
 describe('debounce', () => {
